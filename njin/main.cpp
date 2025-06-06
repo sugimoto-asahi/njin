@@ -1,44 +1,27 @@
 #include <chrono>
-#include <ranges>
-#include <thread>
 
 #include <vulkan/image_setup.h>
 
 #include "core/loader.h"
 #include "core/njVertex.h"
 #include "ecs/Components.h"
+#include "ecs/nj2DPhysicsSystem.h"
 #include "ecs/njArchetype.h"
-#include "ecs/njCameraArchetype.h"
 #include "ecs/njEngine.h"
 #include "ecs/njInputSystem.h"
 #include "ecs/njMovementSystem.h"
-#include "ecs/njPhysicsSystem.h"
-#include "ecs/njPlayerArchetype.h"
+#include "ecs/njObjectArchetype.h"
 #include "ecs/njRenderSystem.h"
-#include "ecs/njSceneGraphSystem.h"
-#include "math/njVec3.h"
-#include "mnt/RoomBuilder.h"
+#include "mnt/TownLevel.h"
 #include "vulkan/AttachmentImages.h"
-#include "vulkan/CommandBuffer.h"
-#include "vulkan/DescriptorPoolBuilder.h"
-#include "vulkan/DescriptorSetLayoutBuilder.h"
 #include "vulkan/DescriptorSets.h"
-#include "vulkan/GraphicsPipelineBuilder.h"
-#include "vulkan/ImageBuilder.h"
 #include "vulkan/PhysicalDevice.h"
-#include "vulkan/PipelineLayoutBuilder.h"
 #include "vulkan/RenderResources.h"
 #include "vulkan/Renderer.h"
-#include "vulkan/SamplerBuilder.h"
 #include "vulkan/ShaderModule.h"
-#include "vulkan/VertexBuffers.h"
 #include "vulkan/Window.h"
 #include "vulkan/config.h"
 #include "vulkan/include/vulkan/RenderInfos.h"
-#include "vulkan/pipeline_setup.h"
-#include "vulkan/util.h"
-
-#include <algorithm>
 
 using namespace njin::vulkan;
 using namespace njin;
@@ -69,11 +52,15 @@ int main() {
     RenderResourceInfos resource_infos{
         .attachment_images = { ATTACHMENT_IMAGE_INFO_DEPTH },
         .set_layouts = { DESCRIPTOR_SET_LAYOUT_INFO_MVP,
-                         DESCRIPTOR_SET_LAYOUT_TEXTURES },
+                         DESCRIPTOR_SET_LAYOUT_TEXTURES,
+                         DESCRIPTOR_SET_LAYOUT_COLLIDERS },
         .render_passes = { RENDER_PASS_INFO_MAIN, RENDER_PASS_INFO_ISO },
-        .pipelines = { PIPELINE_INFO_MAIN_DRAW, PIPELINE_INFO_ISO_DRAW },
+        .pipelines = { PIPELINE_INFO_MAIN_DRAW,
+                       PIPELINE_INFO_ISO_DRAW,
+                       PIPELINE_INFO_MAIN_COLLIDER },
         .vertex_buffers = { VERTEX_BUFFER_INFO_MAIN_DRAW,
-                            VERTEX_BUFFER_INFO_ISO_DRAW }
+                            VERTEX_BUFFER_INFO_ISO_DRAW,
+                            VERTEX_BUFFER_INFO_MAIN_COLLIDER }
     };
 
     RenderResources resources{ logical_device,
@@ -101,49 +88,17 @@ int main() {
     engine.add_system(std::make_unique<ecs::njMovementSystem>());
     core::RenderBuffer render_buffer{};
     engine.add_system(std::make_unique<ecs::njRenderSystem>(render_buffer));
+    engine.add_system(std::make_unique<ecs::nj2DPhysicsSystem>());
+    vulkan::RenderInfos render_queue{ mesh_registry,
+                                      texture_registry,
+                                      resources,
+                                      render_buffer };
 
-    ecs::OrthographicCameraSettings camera_settings{ .near = { 1.f },
-                                                     .far = { 1000.f },
-                                                     .scale = { 10 } };
-    ecs::njCameraArchetypeCreateInfo camera_info{
-        .name = "camera",
-        .transform = ecs::njTransformComponent::make(10.f, 8.f, 10.f),
-        .camera = { .type = ecs::njCameraType::Orthographic,
-                    .up = { 0.f, 1.f, 0.f },
-                    .look_at = { 0.f, 0.f, 0.f },
-                    .aspect = { 16.f / 9.f },
-                    .settings = camera_settings }
-    };
-
-    ecs::njCameraArchetype camera_archetype{ camera_info };
-    engine.add_archetype(camera_archetype);
-
-    ecs::njObjectArchetypeCreateInfo object_info{
-        .name = "cube",
-        .transform = ecs::njTransformComponent::make(0.f, 0.f, 0.f),
-        .mesh = { .mesh = "cube", .texture = "rocks" }
-    };
-    ecs::njObjectArchetype object_archetype{ object_info };
-    engine.add_archetype(object_archetype);
-
-    ecs::njInputComponent input{};
-
-    ecs::njPlayerArchetypeCreateInfo player_archetype_info{
-        .name = "player",
-        .transform = ecs::njTransformComponent::make(0.f, 1.f, 0.f),
-        .input = {},
-        .mesh = { .mesh = "player", .texture = "statue" },
-        .intent = {},
-        .physics = {}
-    };
-    ecs::njPlayerArchetype player_archetype{ player_archetype_info };
-    engine.add_archetype(player_archetype);
+    mnt::TownLevel town{ engine };
+    town.load();
     while (should_run) {
         engine.update();
-        vulkan::RenderInfos render_queue{ mesh_registry,
-                                          texture_registry,
-                                          resources,
-                                          render_buffer };
+        render_queue.update();
         renderer.draw_frame(render_queue);
         // return 0;
     }

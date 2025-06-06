@@ -25,13 +25,10 @@ layout (push_constant) uniform ModelIndex {
 } index;
 
 
-vec3 srgb_to_linear(vec3 srgb_color) {
-    return pow(srgb_color, vec3(2.2));
-}
 
 
 void main() {
     mat4 model = models[index.i].model;
     gl_Position = transpose(vp.projection) * transpose(vp.view) * transpose(model) * vec4(position, 1.0);
-    frag_color = vec4(1.0, 0.0, 0.0, 1.0);
+    frag_color = vec4(1.0, 1.0, 1.0, 1.0);
 }

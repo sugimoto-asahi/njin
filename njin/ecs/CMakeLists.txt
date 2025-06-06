@@ -5,10 +5,12 @@ set(SOURCES
     src/njMovementSystem.cpp
     src/njRenderSystem.cpp
     src/njSceneGraphSystem.cpp
-    src/njPhysicsSystem.cpp
+    src/nj3DPhysicsSystem.cpp
     src/njPlayerArchetype.cpp
     src/njCamaraArchetype.cpp
     src/njObjectArchetype.cpp
+    src/nj2DPhysicsSystem.cpp
+    src/njEnemyArchetype.cpp
     physics/src/BVH.cpp
     physics/src/BVHNode.cpp
 )
