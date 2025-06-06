@@ -43,6 +43,13 @@ namespace njin::vulkan {
         uint32_t texture_index;  // sprite index
     };
 
+    struct ColliderRenderInfo {
+        uint32_t collider_offset;  // start vertex index of collider
+
+        // index of world transform for this collider
+        uint32_t transform_index;
+    };
+
     /**
      * Render info along with a renderpass-subpass key.
      * This informs the renderer as to which renderpass/subpass this piece
@@ -53,7 +60,8 @@ namespace njin::vulkan {
     struct KeyedRenderInfo {
         RenderKey key;
         RenderType type{ RenderType::Mesh };
-        std::variant<MeshRenderInfo, BillboardRenderInfo> info;
+        std::variant<MeshRenderInfo, BillboardRenderInfo, ColliderRenderInfo>
+        info;
     };
 
     /**
@@ -63,7 +71,8 @@ namespace njin::vulkan {
      */
     struct RenderInfo {
         RenderType type{ RenderType::Mesh };
-        std::variant<MeshRenderInfo, BillboardRenderInfo> info;
+        std::variant<MeshRenderInfo, BillboardRenderInfo, ColliderRenderInfo>
+        info;
     };
 
     /**
@@ -74,6 +83,11 @@ namespace njin::vulkan {
         RenderBuckets() = default;
 
         void add(const KeyedRenderInfo& info);
+
+        /**
+         * Clear all existing data inside the buckets
+         */
+        void clear();
 
         std::vector<RenderInfo> get(const RenderKey& key) const;
 
@@ -105,19 +119,22 @@ namespace njin::vulkan {
                     vulkan::RenderResources& render_resources,
                     const core::RenderBuffer& render_buffer);
 
+        void update();
+
         std::vector<RenderInfo> get_render_infos(const RenderKey& key) const;
 
         private:
         const core::RenderBuffer* render_buffer_;
         RenderBuckets render_infos_;
         TextureIndices texture_indices_;
+        const core::njRegistry<core::njMesh>* mesh_registry_;
+        RenderResources* render_resources_;
+        const core::njRegistry<core::njTexture>* texture_registry_;
         /**
          * Update data in render resources, and generate the corresponding
          * RenderInfos
         */
         void write_data(const core::njRegistry<core::njMesh>& mesh_registry,
-                        const ::njin::core::njRegistry<core::njTexture>&
-                        texture_registry,
                         vulkan::RenderResources& render_resources,
                         const math::njMat4f& view_matrix,
                         const math::njMat4f& projection_matrix);

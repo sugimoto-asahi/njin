@@ -1,24 +1,22 @@
 #pragma once
+
 #include "Components.h"
 #include "ecs/njArchetype.h"
 
 namespace njin::ecs {
-    struct njPlayerArchetypeCreateInfo {
+    struct njEnemyArchetypeCreateInfo {
         std::string name;
         njTransformComponent transform;
-        njInputComponent input;
         njMeshComponent mesh;
-        njMovementIntentComponent intent;
         nj2DPhysicsComponent physics;
     };
 
-    class njPlayerArchetype final : public njArchetype {
+    class njEnemyArchetype final : public njArchetype {
         public:
-        explicit njPlayerArchetype(const njPlayerArchetypeCreateInfo& info);
+        explicit njEnemyArchetype(const njEnemyArchetypeCreateInfo& info);
         EntityId make_archetype(njEntityManager& entity_manager) const override;
 
         private:
-        njPlayerArchetypeCreateInfo info_;
+        njEnemyArchetypeCreateInfo info_{};
     };
-
 }  // namespace njin::ecs
