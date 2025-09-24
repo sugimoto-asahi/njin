@@ -55,9 +55,7 @@ int main() {
                          DESCRIPTOR_SET_LAYOUT_TEXTURES,
                          DESCRIPTOR_SET_LAYOUT_COLLIDERS },
         .render_passes = { RENDER_PASS_INFO_MAIN, RENDER_PASS_INFO_ISO },
-        .pipelines = { PIPELINE_INFO_MAIN_DRAW,
-                       PIPELINE_INFO_ISO_DRAW,
-                       PIPELINE_INFO_MAIN_COLLIDER },
+        .pipelines = { PIPELINE_INFO_ISO_DRAW, PIPELINE_INFO_MAIN_COLLIDER },
         .vertex_buffers = { VERTEX_BUFFER_INFO_MAIN_DRAW,
                             VERTEX_BUFFER_INFO_ISO_DRAW,
                             VERTEX_BUFFER_INFO_MAIN_COLLIDER }

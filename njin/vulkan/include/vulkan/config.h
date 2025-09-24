@@ -553,7 +553,7 @@ namespace njin::vulkan {
         .name = "main",
         .attachment_list = { RENDER_PASS_MAIN_ATTACHMENT_DESCRIPTION_SWAPCHAIN,
                              RENDER_PASS_MAIN_ATTACHMENT_DESCRIPTION_DEPTH },
-        .subpasses = { SUBPASS_INFO_MAIN_DRAW, SUBPASS_INFO_MAIN_COLLIDER }
+        .subpasses = { SUBPASS_INFO_MAIN_COLLIDER }
     };
 
     /**

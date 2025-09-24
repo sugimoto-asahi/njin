@@ -61,6 +61,11 @@ namespace njin::ecs {
             physics::BVH bvh{ primitives, physics::BoundingBoxType::XZ };
             physics::BoundingBox box{ bvh.get_bounding_box(26) };
             physics::BoundingBox box_2{ bvh.get_bounding_box(27) };
+            if (box.does_overlap(box_2, physics::BoundingBoxType::XZ)) {
+                std::cout << "overlapping" << std::endl;
+            } else {
+                std::cout << "not overlapping" << std::endl;
+            }
         }
     }
 
