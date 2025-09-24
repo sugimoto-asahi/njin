@@ -143,8 +143,13 @@ movement->velocity = 20.f; // entity 0 is now moving at 20 units/s
 
 ## Setup ##
 
+### Dependencies ###
+
+Ensure `vcpkg` and `cmake` are installed.
+
 ```
-git clone git@github.com:jinruishi/njin.git folder-name
+git clone https://github.com/sugimoto-asahi/njin.git folder-name
 cd folder-name
-cmake -S . -B build && cmake --build build
+cmake -S . -B build
+cmake --build build
 ```
